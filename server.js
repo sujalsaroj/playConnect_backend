@@ -16,11 +16,12 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
-    credentials: true, // allow cookies if needed
+    origin: "https://play-connect-frontend.vercel.app", // frontend Vercel URL
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); // Serve uploaded images
 
