@@ -148,6 +148,12 @@ exports.updatePaymentStatus = async (req, res) => {
     booking.status = "Paid";
     await booking.save();
 
+    // ✅ Mark slot as booked
+    await Turf.updateOne(
+      { _id: booking.turfId, "slots.time": booking.slot },
+      { $set: { "slots.$.booked": true } }
+    );
+
     res.json({ message: "Payment successful, booking completed", booking });
   } catch (err) {
     console.error("Payment Update Error:", err);
