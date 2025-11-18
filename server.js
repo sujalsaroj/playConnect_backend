@@ -16,9 +16,9 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "https://play-connect-frontend.vercel.app", // frontend Vercel URL
-    credentials: true,
+    origin: "https://play-connect-frontend.vercel.app", // frontend ka URL
     methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // agar cookies/session bhejna hai
   })
 );
 

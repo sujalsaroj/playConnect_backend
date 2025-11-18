@@ -51,7 +51,9 @@ exports.register = async (req, res) => {
     await newUser.save();
 
     // Send verification email
-    const verifyLink = `http://localhost:5000/api/verify/${verifyToken}`;
+    const verifyLink = `${
+      import.meta.env.VITE_API_URL
+    }/api/verify/${verifyToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -91,7 +93,9 @@ exports.verifyEmail = async (req, res) => {
     });
 
     if (!user) {
-      return res.redirect("http://localhost:5173/verify-email?status=failed");
+      return res.redirect(
+        "https://play-connect-frontend.vercel.app/verify-email?status=failed"
+      );
     }
 
     user.isVerified = true;
@@ -99,9 +103,13 @@ exports.verifyEmail = async (req, res) => {
     user.verifyTokenExpire = undefined;
     await user.save();
 
-    res.redirect("http://localhost:5173/login?verified=true");
+    res.redirect(
+      "https://play-connect-frontend.vercel.app/login?verified=true"
+    );
   } catch (error) {
-    res.redirect("http://localhost:5173/verify-email?status=failed");
+    res.redirect(
+      "https://play-connect-frontend.vercel.app/verify-email?status=failed"
+    );
   }
 };
 
@@ -129,7 +137,7 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePic: user.profilePic
-          ? `http://localhost:5000${user.profilePic}`
+          ? `${import.meta.env.VITE_API_URL}${user.profilePic}`
           : null,
       },
     });
@@ -201,7 +209,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetTokenExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save();
 
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetLink = `https://play-connect-frontend.vercel.app/reset-password/${resetToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
