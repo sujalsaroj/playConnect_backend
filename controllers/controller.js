@@ -30,55 +30,29 @@ exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
+    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists)
       return res.status(400).json({ message: "User already exists" });
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const verifyToken = crypto.randomBytes(32).toString("hex");
-    const verifyTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-
+    // Create new user without verification
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
       role,
-      verifyToken,
-      verifyTokenExpire,
+      isVerified: true, // directly mark verified
     });
 
     await newUser.save();
 
-    // Send verification email in background (non-blocking)
-    const verifyLink = `https://playconnect-backend.onrender.com/api/verify/${verifyToken}`;
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: { rejectUnauthorized: false },
-    });
-
-    transporter
-      .sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Verify Your Email - PlayConnect",
-        html: `
-          <h3>Welcome to PlayConnect, ${name}!</h3>
-          <p>Please verify your email by clicking the link below:</p>
-          <a href="${verifyLink}" target="_blank">${verifyLink}</a>
-          <p>This link will expire in 24 hours.</p>
-        `,
-      })
-      .catch((err) => console.error("Mail Error:", err));
-
-    // Respond immediately without waiting for email
+    // Directly respond success without email
     res.status(201).json({
-      message:
-        "Registration successful! Please check your email to verify your account.",
+      message: "Registration successful! Please login now.",
+      redirectUrl: "https://play-connect-frontend.vercel.app/login",
     });
   } catch (error) {
     console.error("Registration Error:", error);
