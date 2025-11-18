@@ -51,9 +51,7 @@ exports.register = async (req, res) => {
     await newUser.save();
 
     // Send verification email
-    const verifyLink = `${
-      import.meta.env.VITE_API_URL
-    }/api/verify/${verifyToken}`;
+    const verifyLink = `https://playconnect-backend.onrender.com/api/verify/${verifyToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -68,11 +66,11 @@ exports.register = async (req, res) => {
       to: email,
       subject: "Verify Your Email - PlayConnect",
       html: `
-        <h3>Welcome to PlayConnect, ${name}!</h3>
-        <p>Please verify your email by clicking the link below:</p>
-        <a href="${verifyLink}" target="_blank">${verifyLink}</a>
-        <p>This link will expire in 24 hours.</p>
-      `,
+          <h3>Welcome to PlayConnect, ${name}!</h3>
+          <p>Please verify your email by clicking the link below:</p>
+          <a href="${verifyLink}" target="_blank">${verifyLink}</a>
+          <p>This link will expire in 24 hours.</p>
+        `,
     });
 
     res.status(201).json({
@@ -137,7 +135,7 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         profilePic: user.profilePic
-          ? `${import.meta.env.VITE_API_URL}${user.profilePic}`
+          ? `https://playconnect-backend.onrender.com${user.profilePic}`
           : null,
       },
     });
@@ -226,11 +224,11 @@ exports.forgotPassword = async (req, res) => {
       to: email,
       subject: "Password Reset - Turf Booking System",
       html: `
-        <h3>Password Reset Request</h3>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}" target="_blank">${resetLink}</a>
-        <p>This link will expire in 10 minutes.</p>
-      `,
+          <h3>Password Reset Request</h3>
+          <p>Click the link below to reset your password:</p>
+          <a href="${resetLink}" target="_blank">${resetLink}</a>
+          <p>This link will expire in 10 minutes.</p>
+        `,
     });
 
     res.json({ message: "Password reset link sent to your email." });
