@@ -26,7 +26,6 @@ const upload = multer({ storage });
 exports.uploadProfilePic = upload.single("profilePic");
 
 // Register new user
-// Register new user
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -51,12 +50,7 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    // ✅ Respond immediately
-    res.status(201).json({
-      message: "Registration successful! Please verify your email.",
-    });
-
-    // Send verification email in background
+    // Send verification email in background (non-blocking)
     const verifyLink = `https://playconnect-backend.onrender.com/api/verify/${verifyToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -73,13 +67,19 @@ exports.register = async (req, res) => {
         to: email,
         subject: "Verify Your Email - PlayConnect",
         html: `
-        <h3>Welcome to PlayConnect, ${name}!</h3>
-        <p>Please verify your email by clicking the link below:</p>
-        <a href="${verifyLink}" target="_blank">${verifyLink}</a>
-        <p>This link will expire in 24 hours.</p>
-      `,
+          <h3>Welcome to PlayConnect, ${name}!</h3>
+          <p>Please verify your email by clicking the link below:</p>
+          <a href="${verifyLink}" target="_blank">${verifyLink}</a>
+          <p>This link will expire in 24 hours.</p>
+        `,
       })
-      .catch((err) => console.error("Email sending error:", err));
+      .catch((err) => console.error("Mail Error:", err));
+
+    // Respond immediately without waiting for email
+    res.status(201).json({
+      message:
+        "Registration successful! Please check your email to verify your account.",
+    });
   } catch (error) {
     console.error("Registration Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
