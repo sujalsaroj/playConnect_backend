@@ -26,6 +26,7 @@ const upload = multer({ storage });
 exports.uploadProfilePic = upload.single("profilePic");
 
 // Register new user
+// Register new user
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -50,7 +51,12 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    // Send verification email
+    // ✅ Respond immediately
+    res.status(201).json({
+      message: "Registration successful! Please verify your email.",
+    });
+
+    // Send verification email in background
     const verifyLink = `https://playconnect-backend.onrender.com/api/verify/${verifyToken}`;
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -61,26 +67,25 @@ exports.register = async (req, res) => {
       tls: { rejectUnauthorized: false },
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify Your Email - PlayConnect",
-      html: `
-          <h3>Welcome to PlayConnect, ${name}!</h3>
-          <p>Please verify your email by clicking the link below:</p>
-          <a href="${verifyLink}" target="_blank">${verifyLink}</a>
-          <p>This link will expire in 24 hours.</p>
-        `,
-    });
-
-    res.status(201).json({
-      message: "Registration successful! Please verify your email.",
-    });
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Verify Your Email - PlayConnect",
+        html: `
+        <h3>Welcome to PlayConnect, ${name}!</h3>
+        <p>Please verify your email by clicking the link below:</p>
+        <a href="${verifyLink}" target="_blank">${verifyLink}</a>
+        <p>This link will expire in 24 hours.</p>
+      `,
+      })
+      .catch((err) => console.error("Email sending error:", err));
   } catch (error) {
     console.error("Registration Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
